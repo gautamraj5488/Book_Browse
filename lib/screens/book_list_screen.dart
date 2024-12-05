@@ -219,7 +219,7 @@ class _BookListScreenState extends State<BookListScreen> {
                       return _isLoading
                           ? const Padding(
                               padding: EdgeInsets.all(8.0),
-                              child: Center(child: CircularProgressIndicator()),
+                              child: Center(child: WaveDotsWidget()),
                             )
                           : const SizedBox.shrink();
                     }
