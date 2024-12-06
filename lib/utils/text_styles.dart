@@ -2,27 +2,35 @@ import 'package:flutter/material.dart';
 import 'colors.dart';
 
 class AppTextStyles {
-  static const TextStyle headingStyle = TextStyle(
-    fontSize: 24,
-    fontWeight: FontWeight.bold,
-    color: AppColors.textColor,
-  );
+  final double screenWidth;
+  final double screenHeight;
 
-  static const TextStyle subheadingStyle = TextStyle(
-    fontSize: 18,
-    fontWeight: FontWeight.w600,
-    color: AppColors.textColor,
-  );
 
-  static const TextStyle bodyStyle = TextStyle(
-    fontSize: 16,
-    fontWeight: FontWeight.normal,
-    color: AppColors.textColor,
-  );
+  AppTextStyles(BuildContext context)
+      : screenWidth = MediaQuery.of(context).size.width,
+        screenHeight = MediaQuery.of(context).size.height;
 
-  static const TextStyle buttonTextStyle = TextStyle(
-    fontSize: 16,
-    fontWeight: FontWeight.bold,
-    color: AppColors.whiteColor,
-  );
+  TextStyle get headingStyle => TextStyle(
+        fontSize: screenWidth > 600 ? 24 : 18,
+        fontWeight: FontWeight.bold,
+        color: AppColors.textColor,
+      );
+
+  TextStyle get subheadingStyle => TextStyle(
+        fontSize: 18,
+        fontWeight: FontWeight.w600,
+        color: AppColors.textColor,
+      );
+
+  TextStyle get bodyStyle => TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.normal,
+        color: AppColors.textColor,
+      );
+
+  TextStyle get buttonTextStyle => TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.bold,
+        color: AppColors.whiteColor,
+      );
 }

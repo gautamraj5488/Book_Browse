@@ -1,7 +1,9 @@
+import 'package:book_browse/utils/colors.dart';
 import 'package:book_browse/widgets/image_with_placeholder.dart';
 import 'package:flutter/material.dart';
 import 'package:book_browse/models/book.dart';
 import 'package:url_launcher/url_launcher.dart';
+
 
 class BookDetailScreen extends StatelessWidget {
   final Book book;
@@ -31,11 +33,11 @@ class BookDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context); // Move the theme initialization here
 
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
         title: Text(book.title),
@@ -49,7 +51,7 @@ class BookDetailScreen extends StatelessWidget {
               Card(
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(16.0),
-                  child: ImageWithPlaceholder(imageUrl: book.imageUrl!, width: screenWidth, height: screenHeight*0.7,),
+                  child: ImageWithPlaceholder(imageUrl: book.imageUrl!, width: screenWidth, height: screenHeight * 0.7),
                 ),
               ),
             const SizedBox(height: 20),
@@ -61,25 +63,25 @@ class BookDetailScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildDetailRow(Icons.book, "Title", book.title),
+                    _buildDetailRow(theme, Icons.book, "Title", book.title),
                     const Divider(),
-                    _buildDetailRow(Icons.numbers, "ID", book.id.toString()),
+                    _buildDetailRow(theme, Icons.numbers, "ID", book.id.toString()),
                     const Divider(),
-                    _buildDetailRow(Icons.person, "Authors", book.authors.join(', ')),
+                    _buildDetailRow(theme, Icons.person, "Authors", book.authors.join(', ')),
                     if (book.translators.isNotEmpty) ...[
                       const Divider(),
-                      _buildDetailRow(Icons.translate, "Translators", book.translators.join(', ')),
+                      _buildDetailRow(theme, Icons.translate, "Translators", book.translators.join(', ')),
                     ],
                     const Divider(),
-                    _buildDetailRow(Icons.category, "Subjects", book.subjects.join(', ')),
+                    _buildDetailRow(theme, Icons.category, "Subjects", book.subjects.join(', ')),
                     const Divider(),
-                    _buildDetailRow(Icons.collections_bookmark, "Bookshelves", book.bookshelves.join(', ')),
+                    _buildDetailRow(theme, Icons.collections_bookmark, "Bookshelves", book.bookshelves.join(', ')),
                     const Divider(),
-                    _buildDetailRow(Icons.language, "Languages", book.languages.join(', ')),
+                    _buildDetailRow(theme, Icons.language, "Languages", book.languages.join(', ')),
                     const Divider(),
-                    _buildDetailRow(Icons.copyright, "Copyright", book.copyright ? "Yes" : "No"),
+                    _buildDetailRow(theme, Icons.copyright, "Copyright", book.copyright ? "Yes" : "No"),
                     const Divider(),
-                    _buildDetailRow(Icons.download, "Download Count", book.downloadCount.toString()),
+                    _buildDetailRow(theme, Icons.download, "Download Count", book.downloadCount.toString()),
                   ],
                 ),
               ),
@@ -110,19 +112,20 @@ class BookDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailRow(IconData icon, String label, String value) {
+  // Pass the theme parameter
+  Widget _buildDetailRow(ThemeData theme, IconData icon, String label, String value) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, color: Colors.blueAccent),
+        Icon(icon, color: AppColors.primaryColor),
         const SizedBox(width: 10),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+              Text(label, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textColor)),
               const SizedBox(height: 4),
-              Text(value, style: const TextStyle(fontSize: 14, color: Colors.black87)),
+              Text(value, style: TextStyle(fontSize: 14, color: AppColors.textColor)),
             ],
           ),
         ),

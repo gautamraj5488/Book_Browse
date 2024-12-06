@@ -1,4 +1,5 @@
 import 'package:book_browse/screens/book_list_screen.dart';
+import 'package:book_browse/utils/app_theme.dart';
 import 'package:flutter/material.dart';
 
 
@@ -12,9 +13,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'BookBrowse',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
+      theme: ThemeData.light(),
+      darkTheme: ThemeData.dark(),
+      themeMode: ThemeMode.system,
       home: BookListScreen(),
     );
   }

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:book_browse/utils/text_styles.dart';
 import 'package:book_browse/widgets/shimmer.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ import 'package:book_browse/models/book.dart';
 import 'package:book_browse/screens/book_detail_screen.dart';
 import 'package:book_browse/services/api_service.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:book_browse/utils/colors.dart';
 
 class BookListScreen extends StatefulWidget {
   @override
@@ -43,8 +45,7 @@ class _BookListScreenState extends State<BookListScreen> {
       });
   }
 
-
-Future<void> _fetchBooks() async {
+  Future<void> _fetchBooks() async {
     if (_isLoading) return;
 
     setState(() {
@@ -54,7 +55,6 @@ Future<void> _fetchBooks() async {
     });
 
     try {
-
       if (kIsWeb) {
         final results = await ApiService.fetchBooks(_currentPage);
 
@@ -116,7 +116,6 @@ Future<void> _fetchBooks() async {
     }
   }
 
-
   void _searchBooks(String query) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       setState(() {
@@ -153,28 +152,25 @@ Future<void> _fetchBooks() async {
 
     double childAspectRatio;
     if (screenWidth > 1200) {
-      childAspectRatio = 0.4; // Decreased for larger screens
+      childAspectRatio = 0.4; 
     } else if (screenWidth > 800) {
-      childAspectRatio = 0.5; // Decreased for medium screens
+      childAspectRatio = 0.5;
     } else {
-      childAspectRatio = 0.7; // Decreased for smaller screens
+      childAspectRatio = 0.7;
     }
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
           "Book Discovery",
-          style: TextStyle(
-            fontSize: screenWidth > 600 ? 24 : 18, // Scalable font size
-            fontWeight: FontWeight.bold,
-          ),
+          style: AppTextStyles(context).headingStyle,
         ),
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: AppColors.primaryColor,
         actions: [
           IconButton(
             icon: Icon(
               Icons.search,
-              size: screenWidth > 600 ? 30 : 24, // Larger icons for tablets/desktops
+              size: screenWidth > 600 ? 30 : 24,
             ),
             onPressed: () {
               setState(() {
@@ -198,7 +194,7 @@ Future<void> _fetchBooks() async {
                         borderSide: BorderSide.none,
                       ),
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: AppColors.whiteColor,
                       suffixIcon: Icon(Icons.search),
                     ),
                     onChanged: _searchBooks,
@@ -209,23 +205,23 @@ Future<void> _fetchBooks() async {
       ),
 
       body: _isRequesting && _filteredBooks.isEmpty
-          ?  ShimmerWidget(screenWidth: screenWidth, itemCount: 20,)
+          ? ShimmerWidget(screenWidth: screenWidth, itemCount: 20)
           : _errorMessage.isNotEmpty
               ? Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.error_outline, size: 60, color: Colors.red),
+                      Icon(Icons.error_outline, size: 60, color: AppColors.errorColor),
                       const SizedBox(height: 16),
                       Text(
                         _errorMessage,
                         textAlign: TextAlign.center,
-                        style: const TextStyle(fontSize: 18, color: Colors.red),
+                        style: AppTextStyles(context).bodyStyle.copyWith(color: AppColors.errorColor),
                       ),
                       const SizedBox(height: 16),
                       ElevatedButton(
                         onPressed: _fetchBooks,
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple),
+                        style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryColor),
                         child: const Text("Retry"),
                       ),
                     ],
@@ -279,7 +275,7 @@ Future<void> _fetchBooks() async {
                                 child: ImageWithPlaceholder(
                                   imageUrl: book.imageUrl,
                                   width: double.infinity,
-                                  height: 180,
+                                  height: 170,
                                   fit: BoxFit.cover,
                                 ),
                               ),
@@ -290,31 +286,23 @@ Future<void> _fetchBooks() async {
                                   children: [
                                     Text(
                                       book.title,
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: screenWidth > 600 ? 18 : 16,
-                                        color: Colors.black87,
-                                      ),
-                                      maxLines: 1,
+                                      style: AppTextStyles(context).headingStyle.copyWith(fontSize: 12),
                                       overflow: TextOverflow.ellipsis,
+                                      maxLines: 2,
                                     ),
-                                    const SizedBox(height: 5),
+                                    const SizedBox(height: 8),
                                     Text(
-                                      book.authors.isNotEmpty ? book.authors.join(', ') : "Unknown Author",
-                                      style: TextStyle(
-                                        fontSize: screenWidth > 600 ? 14 : 12, // Adjust for screen width
-                                        color: Colors.grey,
-                                      ),
-                                      maxLines: 1,
+                                      book.authors.join(", "),
+                                      style: AppTextStyles(context).bodyStyle.copyWith(fontSize: 10),
                                       overflow: TextOverflow.ellipsis,
+                                      maxLines: 1,
                                     ),
-
                                   ],
                                 ),
                               ),
                             ],
                           ),
-                        )
+                        ),
                       ),
                     );
                   },
@@ -322,6 +310,3 @@ Future<void> _fetchBooks() async {
     );
   }
 }
-
-
-
