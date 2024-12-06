@@ -1,3 +1,4 @@
+import 'package:book_browse/widgets/wave_dots.dart';
 import 'package:flutter/material.dart';
 
 class ImageWithPlaceholder extends StatelessWidget {
@@ -11,7 +12,7 @@ class ImageWithPlaceholder extends StatelessWidget {
     required this.imageUrl,
     required this.width,
     required this.height,
-    this.fit = BoxFit.cover,
+    this.fit = BoxFit.fitWidth,
   }) : super(key: key);
 
   @override
@@ -25,19 +26,18 @@ class ImageWithPlaceholder extends StatelessWidget {
             loadingBuilder: (context, child, loadingProgress) {
               if (loadingProgress == null) return child;
               return Center(
-                child: CircularProgressIndicator(
-                  value: loadingProgress.expectedTotalBytes != null
-                      ? loadingProgress.cumulativeBytesLoaded /
-                          (loadingProgress.expectedTotalBytes ?? 1)
-                      : null,
-                ),
+                child: Container(
+                  height: height,
+                  padding: EdgeInsets.all(6),
+                  child: WaveDotsWidget(),
+                )
               );
             },
             errorBuilder: (context, error, stackTrace) {
-              return Image.asset(
+              return Image.network(
                 'assets/images/error.jpg',
-                width: width,
-                height: height,
+                width: width*0.1,
+                height: height*0.1,
                 fit: fit,
               );
             },

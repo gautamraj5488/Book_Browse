@@ -1,3 +1,4 @@
+import 'package:book_browse/widgets/image_with_placeholder.dart';
 import 'package:flutter/material.dart';
 import 'package:book_browse/models/book.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -30,6 +31,10 @@ class BookDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
@@ -41,14 +46,10 @@ class BookDetailScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (book.imageUrl != null)
-              Center(
+              Card(
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(16.0),
-                  child: Image.network(
-                    book.imageUrl!,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                  ),
+                  child: ImageWithPlaceholder(imageUrl: book.imageUrl!, width: screenWidth, height: screenHeight*0.7,),
                 ),
               ),
             const SizedBox(height: 20),

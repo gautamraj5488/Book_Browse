@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:book_browse/widgets/shimmer.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:book_browse/widgets/image_with_placeholder.dart';
@@ -6,6 +8,7 @@ import 'package:book_browse/widgets/wave_dots.dart';
 import 'package:book_browse/models/book.dart';
 import 'package:book_browse/screens/book_detail_screen.dart';
 import 'package:book_browse/services/api_service.dart';
+import 'package:shimmer/shimmer.dart';
 
 class BookListScreen extends StatefulWidget {
   @override
@@ -40,7 +43,8 @@ class _BookListScreenState extends State<BookListScreen> {
       });
   }
 
-  Future<void> _fetchBooks() async {
+
+Future<void> _fetchBooks() async {
     if (_isLoading) return;
 
     setState(() {
@@ -50,37 +54,54 @@ class _BookListScreenState extends State<BookListScreen> {
     });
 
     try {
-      final cachedData = await _cacheManager.getFileFromCache('books_page_$_currentPage');
 
-      if (cachedData != null) {
-        final bytes = await cachedData.file.readAsBytes();
-        final jsonData = utf8.decode(bytes);
-        final List<dynamic> results = jsonDecode(jsonData);
-
-        setState(() {
-          _books.addAll(results.map((json) => Book.fromJson(json)).toList());
-          _filteredBooks = List.from(_books); // Initialize filteredBooks
-          _currentPage++;
-        });
-      } else {
+      if (kIsWeb) {
         final results = await ApiService.fetchBooks(_currentPage);
 
         if (results.isNotEmpty) {
-          _cacheManager.putFile(
-            'books_page_$_currentPage',
-            utf8.encode(jsonEncode(results)),
-            fileExtension: 'json',
-          );
-
           setState(() {
             _books.addAll(results.map((json) => Book.fromJson(json)).toList());
-            _filteredBooks = List.from(_books); // Initialize filteredBooks
+            _filteredBooks = List.from(_books);
             _currentPage++;
           });
         } else {
           setState(() {
             _hasMore = false;
           });
+        }
+      } else {
+        final cachedData = await _cacheManager.getFileFromCache('books_page_$_currentPage');
+
+        if (cachedData != null) {
+          final bytes = await cachedData.file.readAsBytes();
+          final jsonData = utf8.decode(bytes);
+          final List<dynamic> results = jsonDecode(jsonData);
+
+          setState(() {
+            _books.addAll(results.map((json) => Book.fromJson(json)).toList());
+            _filteredBooks = List.from(_books);
+            _currentPage++;
+          });
+        } else {
+          final results = await ApiService.fetchBooks(_currentPage);
+
+          if (results.isNotEmpty) {
+            _cacheManager.putFile(
+              'books_page_$_currentPage',
+              utf8.encode(jsonEncode(results)),
+              fileExtension: 'json',
+            );
+
+            setState(() {
+              _books.addAll(results.map((json) => Book.fromJson(json)).toList());
+              _filteredBooks = List.from(_books);
+              _currentPage++;
+            });
+          } else {
+            setState(() {
+              _hasMore = false;
+            });
+          }
         }
       }
     } catch (e) {
@@ -94,6 +115,7 @@ class _BookListScreenState extends State<BookListScreen> {
       });
     }
   }
+
 
   void _searchBooks(String query) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -126,24 +148,45 @@ class _BookListScreenState extends State<BookListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    double childAspectRatio;
+    if (screenWidth > 1200) {
+      childAspectRatio = 0.4; // Decreased for larger screens
+    } else if (screenWidth > 800) {
+      childAspectRatio = 0.5; // Decreased for medium screens
+    } else {
+      childAspectRatio = 0.7; // Decreased for smaller screens
+    }
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Book Discovery", style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(
+          "Book Discovery",
+          style: TextStyle(
+            fontSize: screenWidth > 600 ? 24 : 18, // Scalable font size
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         backgroundColor: Colors.deepPurple,
         actions: [
           IconButton(
-            icon: Icon(Icons.search),
+            icon: Icon(
+              Icons.search,
+              size: screenWidth > 600 ? 30 : 24, // Larger icons for tablets/desktops
+            ),
             onPressed: () {
               setState(() {
-                _isSearching = !_isSearching; // Toggle search bar visibility
-                _searchQuery = ''; // Reset search query when opening search
+                _isSearching = !_isSearching;
+                _searchQuery = '';
               });
             },
           ),
         ],
         bottom: _isSearching
             ? PreferredSize(
-                preferredSize: const Size.fromHeight(56),
+                preferredSize: Size.fromHeight(56),
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: TextField(
@@ -162,27 +205,11 @@ class _BookListScreenState extends State<BookListScreen> {
                   ),
                 ),
               )
-            : null, // Only show search bar if _isSearching is true
+            : null,
       ),
+
       body: _isRequesting && _filteredBooks.isEmpty
-          ? const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  WaveDotsWidget(
-                    color: Colors.blueAccent,
-                    dotSize: 18.0,
-                    dotCount: 5,
-                    duration: Duration(milliseconds: 800),
-                  ),
-                  SizedBox(height: 20),
-                  Text(
-                    "Loading books, please wait...",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.grey),
-                  ),
-                ],
-              ),
-            )
+          ?  ShimmerWidget(screenWidth: screenWidth, itemCount: 20,)
           : _errorMessage.isNotEmpty
               ? Center(
                   child: Column(
@@ -206,11 +233,15 @@ class _BookListScreenState extends State<BookListScreen> {
                 )
               : GridView.builder(
                   padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: screenWidth > 1200
+                      ? 4 // Layout for desktops
+                      : screenWidth > 800
+                          ? 3 // Layout for tablets
+                          : 2, // Layout for phones
                     crossAxisSpacing: 15,
                     mainAxisSpacing: 15,
-                    childAspectRatio: 0.6,
+                    childAspectRatio: childAspectRatio
                   ),
                   controller: _scrollController,
                   itemCount: _filteredBooks.length + (_hasMore ? 1 : 0),
@@ -240,44 +271,50 @@ class _BookListScreenState extends State<BookListScreen> {
                             ),
                           );
                         },
-                        child: Column(
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
-                              child: ImageWithPlaceholder(
-                                imageUrl: book.imageUrl,
-                                width: double.infinity,
-                                height: 180,
-                                fit: BoxFit.cover,
+                        child: SingleChildScrollView(
+                          child: Column(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: ImageWithPlaceholder(
+                                  imageUrl: book.imageUrl,
+                                  width: double.infinity,
+                                  height: 180,
+                                  fit: BoxFit.cover,
+                                ),
                               ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    book.title,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                      color: Colors.black87,
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      book.title,
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: screenWidth > 600 ? 18 : 16,
+                                        color: Colors.black87,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const SizedBox(height: 5),
-                                  Text(
-                                    book.authors.isNotEmpty ? book.authors.join(', ') : "Unknown Author",
-                                    style: const TextStyle(color: Colors.grey),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
+                                    const SizedBox(height: 5),
+                                    Text(
+                                      book.authors.isNotEmpty ? book.authors.join(', ') : "Unknown Author",
+                                      style: TextStyle(
+                                        fontSize: screenWidth > 600 ? 14 : 12, // Adjust for screen width
+                                        color: Colors.grey,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
+                            ],
+                          ),
+                        )
                       ),
                     );
                   },
@@ -285,3 +322,6 @@ class _BookListScreenState extends State<BookListScreen> {
     );
   }
 }
+
+
+
