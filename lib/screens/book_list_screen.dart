@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:book_browse/utils/app_theme.dart';
 import 'package:book_browse/utils/text_styles.dart';
 import 'package:book_browse/widgets/shimmer.dart';
 import 'package:flutter/foundation.dart';
@@ -17,7 +18,9 @@ class BookListScreen extends StatefulWidget {
   _BookListScreenState createState() => _BookListScreenState();
 }
 
-class _BookListScreenState extends State<BookListScreen> {
+class _BookListScreenState extends State<BookListScreen> with TickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _widthAnimation;
   List<Book> _books = [];
   List<Book> _filteredBooks = [];
   int _currentPage = 1;
@@ -27,7 +30,7 @@ class _BookListScreenState extends State<BookListScreen> {
   late ScrollController _scrollController;
   String _errorMessage = '';
   String _searchQuery = '';
-  bool _isSearching = false; // Add this to toggle search bar visibility
+  bool _isSearching = false;
 
   final _cacheManager = DefaultCacheManager();
 
@@ -37,12 +40,28 @@ class _BookListScreenState extends State<BookListScreen> {
     _fetchBooks();
     _scrollController = ScrollController()
       ..addListener(() {
-        if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent &&
-            !_isLoading &&
-            _hasMore) {
+        if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent && !_isLoading && _hasMore && !_isSearching) {
           _fetchBooks();
         }
       });
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _widthAnimation = Tween<double>(begin: 0.0, end: 0.8).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+   void _toggleSearch() {
+    setState(() {
+      _isSearching = !_isSearching;
+      if (_isSearching) {
+        _controller.forward();  // Start animation
+      } else {
+        _controller.reverse();  // Reverse animation
+      }
+    });
   }
 
   Future<void> _fetchBooks() async {
@@ -56,47 +75,31 @@ class _BookListScreenState extends State<BookListScreen> {
 
     try {
       if (kIsWeb) {
+        // Fetch directly for web
         final results = await ApiService.fetchBooks(_currentPage);
-
-        if (results.isNotEmpty) {
-          setState(() {
-            _books.addAll(results.map((json) => Book.fromJson(json)).toList());
-            _filteredBooks = List.from(_books);
-            _currentPage++;
-          });
-        } else {
-          setState(() {
-            _hasMore = false;
-          });
-        }
+        _processResults(results);
       } else {
-        final cachedData = await _cacheManager.getFileFromCache('books_page_$_currentPage');
+        // Attempt to load cached data first
+        final cachedData =
+            await _cacheManager.getFileFromCache('books_page_$_currentPage');
 
         if (cachedData != null) {
           final bytes = await cachedData.file.readAsBytes();
           final jsonData = utf8.decode(bytes);
           final List<dynamic> results = jsonDecode(jsonData);
-
-          setState(() {
-            _books.addAll(results.map((json) => Book.fromJson(json)).toList());
-            _filteredBooks = List.from(_books);
-            _currentPage++;
-          });
+          _processResults(results);
         } else {
+          // Fetch from API if no cache exists
           final results = await ApiService.fetchBooks(_currentPage);
 
           if (results.isNotEmpty) {
-            _cacheManager.putFile(
+            // Cache the fetched data
+            await _cacheManager.putFile(
               'books_page_$_currentPage',
               utf8.encode(jsonEncode(results)),
               fileExtension: 'json',
             );
-
-            setState(() {
-              _books.addAll(results.map((json) => Book.fromJson(json)).toList());
-              _filteredBooks = List.from(_books);
-              _currentPage++;
-            });
+            _processResults(results);
           } else {
             setState(() {
               _hasMore = false;
@@ -116,32 +119,42 @@ class _BookListScreenState extends State<BookListScreen> {
     }
   }
 
-  void _searchBooks(String query) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+  void _processResults(List<dynamic> results) {
+    if (results.isNotEmpty) {
       setState(() {
-        _searchQuery = query;
-        if (_searchQuery.isEmpty) {
-          _filteredBooks = List.from(_books); // Show all books if search query is empty
-        } else {
-          _filteredBooks = _books.where((book) {
-            final lowerCaseQuery = _searchQuery.toLowerCase();
-            bool matchesTitle = book.title.toLowerCase().startsWith(lowerCaseQuery);
-            bool matchesAuthor = book.authors.any((author) => author.toLowerCase().startsWith(lowerCaseQuery));
-            bool matchesBookshelf = book.bookshelves.any((shelf) => shelf.toLowerCase().contains(lowerCaseQuery));
-
-            bool isRelevanceMatch = book.authors.any((author) =>
-                author.toLowerCase().contains(lowerCaseQuery));
-
-            return matchesTitle || matchesAuthor || matchesBookshelf || isRelevanceMatch;
-          }).toList();
-        }
+        _books.addAll(results.map((json) => Book.fromJson(json)).toList());
+        _filteredBooks = List.from(_books);
+        _currentPage++;
       });
+    } else {
+      setState(() {
+        _hasMore = false;
+      });
+    }
+  }
+
+  void _searchBooks(String query) {
+    setState(() {
+      _searchQuery = query.trim();
+      if (_searchQuery.isEmpty) {
+        _filteredBooks = List.from(_books); // Show all books
+      } else {
+        _filteredBooks = _books.where((book) {
+          final lowerCaseQuery = _searchQuery.toLowerCase();
+          return book.title.toLowerCase().contains(lowerCaseQuery) ||
+              book.authors.any((author) =>
+                  author.toLowerCase().contains(lowerCaseQuery)) ||
+              book.bookshelves.any(
+                  (shelf) => shelf.toLowerCase().contains(lowerCaseQuery));
+        }).toList();
+      }
     });
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -160,48 +173,66 @@ class _BookListScreenState extends State<BookListScreen> {
     }
 
     return Scaffold(
+      backgroundColor: AppColors.backgroundColor,
       appBar: AppBar(
-        title: Text(
-          "Book Discovery",
-          style: AppTextStyles(context).headingStyle,
+        title: AnimatedOpacity(
+          opacity: _isSearching ? 0.0 : 1.0,
+          duration: const Duration(milliseconds: 300),
+          child: Text(
+            "Book Discovery",
+            style: AppTextStyles(context).appBarTextStyle,
+          ),
         ),
-        backgroundColor: AppColors.primaryColor,
         actions: [
-          IconButton(
-            icon: Icon(
-              Icons.search,
-              size: screenWidth > 600 ? 30 : 24,
-            ),
-            onPressed: () {
-              setState(() {
-                _isSearching = !_isSearching;
-                _searchQuery = '';
-              });
-            },
+          Row(
+            children: [
+              if (_isSearching)
+                AnimatedBuilder(
+                  animation: _controller,
+                  builder: (context, child) {
+                    return Container(
+                      decoration: AppTheme.containerDecoration,
+                      width: MediaQuery.of(context).size.width * _widthAnimation.value,
+                      child: TextField(
+                        autofocus: true,
+                        decoration: InputDecoration(
+                          hintText: "Search books...",
+                          hintStyle: AppTextStyles(context).searchBarTextStyle,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                          filled: true,
+                          fillColor: AppColors.cardColor,
+                        ),
+                        onChanged: (value) {
+                          setState(() {
+                            _searchQuery = value;
+                          });
+                          _searchBooks(value);
+                        },
+                      ),
+                    );
+                  },
+                ),
+              IconButton(
+                icon: Icon(
+                  _isSearching ? Icons.close : Icons.search,
+                  color: AppColors.whiteColor,
+                  size: screenWidth > 600 ? 30 : 24,
+                ),
+                onPressed: (){
+                  _toggleSearch();
+                  if (!_isSearching) {
+                      _searchQuery = ''; 
+                      _fetchBooks();
+                    } 
+                }
+                 
+              ),
+            ],
           ),
         ],
-        bottom: _isSearching
-            ? PreferredSize(
-                preferredSize: Size.fromHeight(56),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: TextField(
-                    autofocus: true,
-                    decoration: InputDecoration(
-                      hintText: "Search books...",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                      filled: true,
-                      fillColor: AppColors.whiteColor,
-                      suffixIcon: Icon(Icons.search),
-                    ),
-                    onChanged: _searchBooks,
-                  ),
-                ),
-              )
-            : null,
       ),
 
       body: _isRequesting && _filteredBooks.isEmpty
@@ -253,6 +284,7 @@ class _BookListScreenState extends State<BookListScreen> {
 
                     final book = _filteredBooks[index];
                     return Card(
+                      color: AppColors.cardColor,
                       margin: EdgeInsets.zero,
                       elevation: 8,
                       shape: RoundedRectangleBorder(

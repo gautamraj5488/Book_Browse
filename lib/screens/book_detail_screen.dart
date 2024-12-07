@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:book_browse/utils/colors.dart';
+import 'package:book_browse/utils/text_styles.dart';
 import 'package:book_browse/widgets/image_with_placeholder.dart';
 import 'package:flutter/material.dart';
 import 'package:book_browse/models/book.dart';
@@ -33,13 +36,22 @@ class BookDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context); // Move the theme initialization here
 
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
       appBar: AppBar(
+        
+         leading: IconButton(
+          icon: Icon(
+            Platform.isIOS ? Icons.arrow_back_ios : Icons.arrow_back, 
+            color: AppColors.whiteColor, 
+          ),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
         title: Text(book.title),
       ),
       body: SingleChildScrollView(
@@ -63,25 +75,25 @@ class BookDetailScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildDetailRow(theme, Icons.book, "Title", book.title),
+                    _buildDetailRow(Icons.book, "Title", book.title),
                     const Divider(),
-                    _buildDetailRow(theme, Icons.numbers, "ID", book.id.toString()),
+                    _buildDetailRow(Icons.numbers, "ID", book.id.toString()),
                     const Divider(),
-                    _buildDetailRow(theme, Icons.person, "Authors", book.authors.join(', ')),
+                    _buildDetailRow(Icons.person, "Authors", book.authors.join(', ')),
                     if (book.translators.isNotEmpty) ...[
                       const Divider(),
-                      _buildDetailRow(theme, Icons.translate, "Translators", book.translators.join(', ')),
+                      _buildDetailRow(Icons.translate, "Translators", book.translators.join(', ')),
                     ],
                     const Divider(),
-                    _buildDetailRow(theme, Icons.category, "Subjects", book.subjects.join(', ')),
+                    _buildDetailRow(Icons.category, "Subjects", book.subjects.join(', ')),
                     const Divider(),
-                    _buildDetailRow(theme, Icons.collections_bookmark, "Bookshelves", book.bookshelves.join(', ')),
+                    _buildDetailRow(Icons.collections_bookmark, "Bookshelves", book.bookshelves.join(', ')),
                     const Divider(),
-                    _buildDetailRow(theme, Icons.language, "Languages", book.languages.join(', ')),
+                    _buildDetailRow(Icons.language, "Languages", book.languages.join(', ')),
                     const Divider(),
-                    _buildDetailRow(theme, Icons.copyright, "Copyright", book.copyright ? "Yes" : "No"),
+                    _buildDetailRow(Icons.copyright, "Copyright", book.copyright ? "Yes" : "No"),
                     const Divider(),
-                    _buildDetailRow(theme, Icons.download, "Download Count", book.downloadCount.toString()),
+                    _buildDetailRow(Icons.download, "Download Count", book.downloadCount.toString()),
                   ],
                 ),
               ),
@@ -89,20 +101,17 @@ class BookDetailScreen extends StatelessWidget {
             const SizedBox(height: 20),
             Text(
               "Formats",
-              style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: theme.primaryColor),
+              style: AppTextStyles(context).headingStyle,
             ),
             const SizedBox(height: 10),
             ...book.formats.entries.map((entry) {
               return Card(
-                elevation: 2,
-                margin: const EdgeInsets.symmetric(vertical: 6),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 child: ListTile(
-                  leading: const Icon(Icons.link, color: Colors.blueAccent),
+                  leading: Icon(Icons.link, color: AppColors.primaryColor),
                   title: Text(entry.key, style: const TextStyle(fontWeight: FontWeight.bold)),
                   subtitle: Text(entry.value, style: const TextStyle(fontSize: 12)),
                   onTap: () => _launchUrl(context, entry.value),
-                  trailing: const Icon(Icons.open_in_browser, color: Colors.blueAccent),
+                  // trailing: Icon(Icons.open_in_browser, color: AppColors.buttonColor),
                 ),
               );
             }).toList(),
@@ -113,7 +122,7 @@ class BookDetailScreen extends StatelessWidget {
   }
 
   // Pass the theme parameter
-  Widget _buildDetailRow(ThemeData theme, IconData icon, String label, String value) {
+  Widget _buildDetailRow(IconData icon, String label, String value) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

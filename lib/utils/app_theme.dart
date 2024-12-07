@@ -1,8 +1,22 @@
 import 'package:flutter/material.dart';
 import 'colors.dart';
-import 'package:book_browse/utils/text_styles.dart'; // Ensure AppTextStyles is correctly imported
+import 'package:book_browse/utils/text_styles.dart'; 
 
 class AppTheme {
+  // Method to get container decoration for the theme
+  static BoxDecoration get containerDecoration => BoxDecoration(
+    color: AppColors.cardColor,
+    borderRadius: BorderRadius.circular(12),
+    border: Border.all(color: AppColors.borderColor),
+    boxShadow: [
+      BoxShadow(
+        color: AppColors.shadowColor,
+        offset: Offset(0, 4),
+        blurRadius: 4,
+      ),
+    ],
+  );
+
   // Light Theme
   static ThemeData lightTheme(BuildContext context) {
     AppTextStyles textStyles = AppTextStyles(context);
