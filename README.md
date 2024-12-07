@@ -91,7 +91,7 @@ If you'd like to contribute to this project, please fork the repository and crea
 ---
 
 ## **License:**
-This project is open-source and available under the MIT License. See the [LICENSE](https://pointerpointer.com/) file for more details.
+This project is licensed under the MIT License.
 
 ---
 
