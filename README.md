@@ -2,100 +2,120 @@
 
 Book Browse is a Flutter-based mobile application that allows users to browse and search for books. The app fetches data from an API and provides functionalities such as searching, filtering, and displaying books with information like title, author, and bookshelves. It also integrates caching to improve performance and offer a seamless experience, even when offline.
 
-## **Features:**
+---
+
+## **Features**
 - **Search Functionality:** 
-  - Search for books based on title, author, and bookshelf.
-  - Displays search suggestions and filtering options as the user types.
-  - Real-time search results are shown as users input their queries.
-- **Infinite Scrolling:**
-  - Fetches additional books as the user scrolls down the page.
-  - Data is loaded incrementally to enhance performance and minimize wait times.
+  - Search for books by title, author, or bookshelf.
+  - Displays dynamic search suggestions and real-time filtering as the user types.
+  - Optimized for accuracy and responsiveness.
+
+- **Infinite Scrolling:** 
+  - Dynamically loads more books as the user scrolls.
+  - Efficient data handling ensures smooth and responsive performance.
+
 - **Caching with Flutter Cache Manager:** 
-  - Utilizes caching to store books' data, reducing the number of API calls.
-  - If cached data is available, it is displayed to the user, improving app load times.
-  - Refreshes data from the API when necessary, ensuring content stays up to date.
+  - Reduces redundant API calls by storing book data locally.
+  - Provides offline access to previously viewed content.
+
+- **Responsive Design:**
+  - Ensures compatibility with various device sizes.
+  - The grid layout displays book thumbnails neatly for better accessibility.
+
 - **Book Details Screen:**
-  - Displays detailed information about each book, such as its title, author, genre, and cover image.
-- **Responsive Design:** 
-  - Optimized for various mobile screen sizes, ensuring a smooth experience on phones and tablets.
-  - Grid layout used for book display, providing an organized view of the books.
-  - App bar with search functionality that remains visible even when the keyboard is active.
+  - Shows book-specific information, such as the title, author, genre, and more.
 
 ---
 
-## **Setup Instructions:**
+## **Code Structure**
 
-### **1. Clone the Repository:**
-Clone the project to your local machine using the following command:
+The project follows a clean and modular code structure, adhering to the best practices of Flutter development. Here's a brief overview:
 
-```bash
-git clone https://github.com/gautamraj5488/Book_Browse
-```
-
-### **2. Install Dependencies:**
-Navigate to the project directory and install the necessary dependencies by running:
-
-```bash
-cd book-browse
-flutter pub get
-```
-
-### **3. Run the App:**
-To run the application on your device or emulator, use:
-
-```bash
-flutter run
-```
-
----
-
-## **Project Structure:**
-
-- `lib/`: Contains all the source code for the application.
-  - `models/`: Contains data models, including `Book` model.
-  - `services/`: API service classes for fetching book data from the backend.
-  - `screens/`: UI code for different screens in the app, such as `BookListScreen` and `BookDetailScreen`.
-  - `widgets/`: Custom reusable widgets, such as `WaveDotsWidget` and `ImageWithPlaceholder`.
+### **Project Directories**
+- **`lib/`:** Main source code folder.
+  - **`models/`:** 
+    - Contains classes to define data models (e.g., `Book`).
+    - These models map API responses into Flutter-friendly structures.
+  - **`services/`:** 
+    - Houses service classes responsible for API interactions.
+    - Includes methods for fetching book data and handling errors.
+  - **`screens/`:** 
+    - Includes different UI screens such as:
+      - `BookListScreen`: Displays a scrollable list of books with filters.
+      - `BookDetailScreen`: Shows detailed information for selected books.
+  - **`widgets/`:** 
+    - Custom widgets for reusable UI components:
+      - `BookCard`: Displays a single book with its details.
+      - `ErrorMessage` : Display error messages.
+      - `LoadingIndicator` : Display loading indicator when waiting for data.
+      - `WaveDotsWidget`: A wave animation used for loading indicators.
+      - `ImageWithPlaceholder`: Smoothly transitions between placeholder and loaded images.
+      - `ShimmerWidget` : This enhances user experience.
+  - **`utils/`:**
+    - Contains utility files for constants, themes, and helper functions.
 
 ---
 
-## **Key Widgets and Screens:**
+## **Key Design Decisions**
+- **Separation of Concerns:**
+  - Each folder in the `lib/` directory has a specific responsibility, ensuring scalability and readability.
 
-- **BookListScreen:**
-  - Displays a list of books, implemented with infinite scrolling and search filtering.
-  
-- **BookDetailScreen:**
-  - Shows detailed information about a specific book, such as a summary, author details, and related books.
+- **Responsive and Adaptive UI:**
+  - The app uses media queries and layout builders to ensure compatibility with different screen sizes.
+  - Provides an optimal viewing experience on both small and large screens.
 
-- **BookSearchDelegate:**
-  - Custom widget that handles search functionality, enabling users to search for books by title, author, and bookshelves.
+- **Custom Widgets:**
+  - Reusable widgets like `WaveDotsWidget` and `ImageWithPlaceholder` improve code modularity.
+  - These components add to the aesthetic and functional appeal of the app.
 
-- **WaveDotsWidget:**
-  - A custom loading widget that displays an animation of dots moving in a wave-like pattern while data is being fetched.
-
-- **ImageWithPlaceholder:**
-  - Displays book images with a placeholder that’s shown while the image is loading. This ensures smooth visual transitions.
+- **Caching:** 
+  - Offline-first design improves usability and reduces the need for continuous API calls.
 
 ---
 
-## **Caching:**
-- The app uses the `flutter_cache_manager` package to cache the books' data, improving both app speed and offline access.
-- Cached data is retrieved when available, reducing the need for repetitive API calls.
-- Cached data is updated periodically to ensure that the user always sees the most recent content.
+## **Setup Instructions**
+
+1. **Clone the Repository:**
+   ```bash
+   git clone https://github.com/gautamraj5488/Book_Browse.git
+   ```
+
+2. **Install Dependencies:**
+   ```bash
+   cd book-browse
+   flutter pub get
+   ```
+
+3. **Run the App:**
+   ```bash
+   flutter run
+   ```
 
 ---
 
-## **Contributing:**
-If you'd like to contribute to this project, please fork the repository and create a pull request with your changes. We encourage contributions to improve the app's functionality, UI, and performance. All contributions are welcome!
+## **How It Works**
+1. **Fetching Data:**
+   - The `services/` directory handles all API interactions. Data is fetched and stored in models defined in the `models/` directory.
+
+2. **Displaying Books:**
+   - The `screens/BookListScreen` displays books in a grid layout. Infinite scrolling loads additional books as users navigate through the app.
+
+3. **Search:**
+   - We can search the book by the title of the book, name of the author, or by the bookshelf.
+
+4. **Offline Mode:**
+   - Cached data is retrieved using the `flutter_cache_manager` package, reducing API usage and improving app performance.
 
 ---
 
-## **License:**
+## **Contribution Guidelines**
+
+We welcome contributions to enhance the app’s features or fix issues. Please:
+1. Fork the repository.
+2. Commit your changes.
+3. Submit a pull request with a detailed description of the update.
+
+---
+
+## **License**
 This project is licensed under the MIT License.
-
----
-
-## **Acknowledgements:**
-- The app fetches book data using an API service integrated into the app.
-- Built with Flutter and Dart for efficient mobile development.
-- Special thanks to [Flutter Cache Manager](https://pub.dev/packages/flutter_cache_manager) for providing a reliable caching solution.

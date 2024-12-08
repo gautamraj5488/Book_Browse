@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
+  static Color get highlightColor => _getColor(
+    light: Colors.red,
+    dark: Colors.red);
   static Color get primaryColor => _getColor(
       light: SMAColors.primary, // Primary color
       dark: SMAColors.accent); // Accent color as the primary alternative in dark mode

@@ -1,5 +1,6 @@
 import 'package:book_browse/screens/book_list_screen.dart';
 import 'package:book_browse/utils/app_theme.dart';
+import 'package:book_browse/utils/shake_manager.dart';
 import 'package:flutter/material.dart';
 
 
@@ -16,7 +17,9 @@ class MyApp extends StatelessWidget {
       theme: AppTheme.lightTheme(context),
       darkTheme: AppTheme.darkTheme(context),
       themeMode: ThemeMode.system,
-      home: BookListScreen(),
+      home: ShakeManager(
+        child: BookListScreen(),
+      )
     );
   }
 }

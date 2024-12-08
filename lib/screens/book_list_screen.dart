@@ -1,6 +1,9 @@
 import 'dart:convert';
 import 'package:book_browse/utils/app_theme.dart';
 import 'package:book_browse/utils/text_styles.dart';
+import 'package:book_browse/widgets/book_card.dart';
+import 'package:book_browse/widgets/error_message.dart';
+import 'package:book_browse/widgets/loading_indicator.dart';
 import 'package:book_browse/widgets/shimmer.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -75,11 +78,9 @@ class _BookListScreenState extends State<BookListScreen> with TickerProviderStat
 
     try {
       if (kIsWeb) {
-        // Fetch directly for web
         final results = await ApiService.fetchBooks(_currentPage);
         _processResults(results);
       } else {
-        // Attempt to load cached data first
         final cachedData =
             await _cacheManager.getFileFromCache('books_page_$_currentPage');
 
@@ -133,23 +134,30 @@ class _BookListScreenState extends State<BookListScreen> with TickerProviderStat
     }
   }
 
-  void _searchBooks(String query) {
-    setState(() {
-      _searchQuery = query.trim();
-      if (_searchQuery.isEmpty) {
-        _filteredBooks = List.from(_books); // Show all books
-      } else {
-        _filteredBooks = _books.where((book) {
-          final lowerCaseQuery = _searchQuery.toLowerCase();
-          return book.title.toLowerCase().contains(lowerCaseQuery) ||
-              book.authors.any((author) =>
-                  author.toLowerCase().contains(lowerCaseQuery)) ||
-              book.bookshelves.any(
-                  (shelf) => shelf.toLowerCase().contains(lowerCaseQuery));
-        }).toList();
-      }
-    });
-  }
+void _searchBooks(String query) {
+  setState(() {
+    _searchQuery = query.trim();
+
+    if (_searchQuery.isEmpty) {
+      _filteredBooks = List.from(_books);
+    } else {
+      final lowerCaseQuery = _searchQuery.toLowerCase();
+
+      _filteredBooks = _books.where((book) {
+        return _anyWordStartsWith(book.title, lowerCaseQuery) ||
+            book.authors.any((author) => _anyWordStartsWith(author, lowerCaseQuery)) ||
+            book.bookshelves.any((shelf) => _anyWordStartsWith(shelf, lowerCaseQuery));
+      }).toList();
+    }
+  });
+}
+
+bool _anyWordStartsWith(String text, String query) {
+  return text.toLowerCase().split(' ').any((word) => word.startsWith(query));
+}
+
+
+
 
   @override
   void dispose() {
@@ -161,29 +169,19 @@ class _BookListScreenState extends State<BookListScreen> with TickerProviderStat
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-
-    double childAspectRatio;
-    if (screenWidth > 1200) {
-      childAspectRatio = 0.4; 
-    } else if (screenWidth > 800) {
-      childAspectRatio = 0.5;
-    } else {
-      childAspectRatio = 0.7;
-    }
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundColor,
+      backgroundColor: AppColors.cardColor,
       appBar: AppBar(
         title: AnimatedOpacity(
           opacity: _isSearching ? 0.0 : 1.0,
           duration: const Duration(milliseconds: 300),
           child: Text(
-            "Book Discovery",
+            "Book Browse",
             style: AppTextStyles(context).appBarTextStyle,
           ),
         ),
-        actions: [
+         actions: [
           Row(
             children: [
               if (_isSearching)
@@ -234,111 +232,37 @@ class _BookListScreenState extends State<BookListScreen> with TickerProviderStat
           ),
         ],
       ),
-
       body: _isRequesting && _filteredBooks.isEmpty
           ? ShimmerWidget(screenWidth: screenWidth, itemCount: 20)
           : _errorMessage.isNotEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.error_outline, size: 60, color: AppColors.errorColor),
-                      const SizedBox(height: 16),
-                      Text(
-                        _errorMessage,
-                        textAlign: TextAlign.center,
-                        style: AppTextStyles(context).bodyStyle.copyWith(color: AppColors.errorColor),
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: _fetchBooks,
-                        style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryColor),
-                        child: const Text("Retry"),
-                      ),
-                    ],
-                  ),
-                )
+              ? ErrorMessage(message: _errorMessage, onRetry: _fetchBooks)
               : GridView.builder(
                   padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: screenWidth > 1200
-                      ? 4 // Layout for desktops
-                      : screenWidth > 800
-                          ? 3 // Layout for tablets
-                          : 2, // Layout for phones
+                    crossAxisCount: screenWidth > 1200 ? 4 : screenWidth > 800 ? 3 : 2,
                     crossAxisSpacing: 15,
                     mainAxisSpacing: 15,
-                    childAspectRatio: childAspectRatio
+                    childAspectRatio: screenWidth > 1200 ? 0.4 : screenWidth > 800 ? 0.5 : 0.7,
                   ),
                   controller: _scrollController,
                   itemCount: _filteredBooks.length + (_hasMore ? 1 : 0),
                   itemBuilder: (ctx, index) {
                     if (index == _filteredBooks.length) {
-                      return _isLoading
-                          ? const Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: Center(child: WaveDotsWidget()),
-                            )
-                          : const SizedBox.shrink();
+                      return _isLoading ? const LoadingIndicator() : const SizedBox.shrink();
                     }
-
                     final book = _filteredBooks[index];
-                    return Card(
-                      color: AppColors.cardColor,
-                      margin: EdgeInsets.zero,
-                      elevation: 8,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => BookDetailScreen(book: book),
-                            ),
-                          );
-                        },
-                        child: SingleChildScrollView(
-                          child: Column(
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: ImageWithPlaceholder(
-                                  imageUrl: book.imageUrl,
-                                  width: double.infinity,
-                                  height: 170,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      book.title,
-                                      style: AppTextStyles(context).headingStyle.copyWith(fontSize: 12),
-                                      overflow: TextOverflow.ellipsis,
-                                      maxLines: 2,
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      book.authors.join(", "),
-                                      style: AppTextStyles(context).bodyStyle.copyWith(fontSize: 10),
-                                      overflow: TextOverflow.ellipsis,
-                                      maxLines: 1,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+                    return BookCard(
+                      book: book,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => BookDetailScreen(book: book)),
+                        );
+                      }, searchQuery: _searchQuery,
                     );
                   },
                 ),
     );
   }
+
 }

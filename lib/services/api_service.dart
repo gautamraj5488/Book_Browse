@@ -1,8 +1,9 @@
 import 'dart:convert';
+import 'package:book_browse/utils/constants.dart';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  static const String baseUrl = "https://gutendex.com/books/";
+  static const String baseUrl = Constants.apiBaseUrl;
 
   // Fetch books from the API based on the current page
   static Future<List<Map<String, dynamic>>> fetchBooks(int page) async {
