@@ -16,7 +16,7 @@
     </queries>
 
     <application
-        android:label="book_browse"
+        android:label="Book Browse"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

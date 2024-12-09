@@ -8,12 +8,9 @@ import 'package:book_browse/widgets/shimmer.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-import 'package:book_browse/widgets/image_with_placeholder.dart';
-import 'package:book_browse/widgets/wave_dots.dart';
 import 'package:book_browse/models/book.dart';
 import 'package:book_browse/screens/book_detail_screen.dart';
 import 'package:book_browse/services/api_service.dart';
-import 'package:shimmer/shimmer.dart';
 import 'package:book_browse/utils/colors.dart';
 
 class BookListScreen extends StatefulWidget {

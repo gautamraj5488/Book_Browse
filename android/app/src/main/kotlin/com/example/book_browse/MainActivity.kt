@@ -1,4 +1,4 @@
-package com.example.book_browse
+package com.the_civilians.book_browse
 
 import io.flutter.embedding.android.FlutterActivity
 

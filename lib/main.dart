@@ -1,14 +1,14 @@
-import 'package:book_browse/screens/book_list_screen.dart';
+import 'package:book_browse/screens/splash_screen.dart';
 import 'package:book_browse/utils/app_theme.dart';
-import 'package:book_browse/utils/shake_manager.dart';
 import 'package:flutter/material.dart';
 
-
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -17,9 +17,7 @@ class MyApp extends StatelessWidget {
       theme: AppTheme.lightTheme(context),
       darkTheme: AppTheme.darkTheme(context),
       themeMode: ThemeMode.system,
-      home: ShakeManager(
-        child: BookListScreen(),
-      )
+      home: const SplashScreen()
     );
   }
 }

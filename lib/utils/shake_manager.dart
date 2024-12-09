@@ -129,67 +129,84 @@ class _ShakeManagerState extends State<ShakeManager> {
   }
 
   void _showReportIssueDialog() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          backgroundColor: SMAColors.dark,
-          title: const Text(
-            "Report Issue",
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          content: TextField(
-            controller: _controller,
-            maxLines: 4,
-            decoration: InputDecoration(
-              hintText: "Describe the issue...",
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: const BorderSide(color: SMAColors.info),
-              ),
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        shape: RoundedRectangleBorder(
+          side: const BorderSide(width: 0.5, color: SMAColors.white),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        backgroundColor: SMAColors.dark,
+        title: const Text(
+          "Report Issue",
+          style: TextStyle(fontWeight: FontWeight.bold, color: SMAColors.white),
+        ),
+        content: TextField(
+          controller: _controller,
+          maxLines: 4,
+          decoration: InputDecoration(
+            hintText: "Describe the issue...",
+            hintStyle: const TextStyle(color: SMAColors.white),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(color: SMAColors.info),
             ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context), // Close dialog
-              child: Text(
-                "Cancel",
-                style: TextStyle(color: AppColors.errorColor),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context), // Close dialog
+            child: Text(
+              "Cancel",
+              style: TextStyle(color: AppColors.errorColor),
+            ),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.successColor,
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 30),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
               ),
             ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.successColor,
-                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 30),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              onPressed: () {
+            onPressed: () {
+              // Check if the text is empty
+              if (_controller.text.trim().isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    backgroundColor: SMAColors.dark,
+                    content: Text(
+                      "Write your issue!",
+                      style: TextStyle(color: AppColors.errorColor, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                );
+              } else {
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     backgroundColor: SMAColors.dark,
                     content: Text(
-                      "We are sorry for your inconvenience. We will look into the issue as soon as possible.",
-                      style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),
+                      "Thank you for your submission!\nWe sincerely apologize for the inconvenience. Rest assured, we will look into the issue as soon as possible.",
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                     ),
                   ),
                 );
-              },
-              child: const Text("Submit",style: TextStyle(color: Colors.white)),
-            ),
-          ],
-        );
-      },
-    );
-  }
+                _controller.clear();
+              }
+            },
+            child: const Text("Submit", style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      );
+    },
+  );
+}
+
 
   @override
   Widget build(BuildContext context) {
