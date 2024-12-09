@@ -1,14 +1,12 @@
 # **Book Browse: Book Discovery Application**
 
-Book Browse is a Flutter-based mobile application that allows users to browse and search for books. The app fetches data from an API and provides functionalities such as searching, filtering, and displaying books with information like title, author, and bookshelves. It also integrates caching to improve performance and offer a seamless experience, even when offline.
+Book Browse is a Flutter-based mobile application that allows users to browse and search for books. The app fetches data from an API and provides functionalities such as searching and displaying books with information like title, author, and bookshelves. It also integrates caching to improve performance and offer a seamless experience, even when offline.
 
 ---
 
 ## **Features**
 - **Search Functionality:** 
   - Search for books by title, author, or bookshelf.
-  - Displays dynamic search suggestions and real-time filtering as the user types.
-  - Optimized for accuracy and responsiveness.
 
 - **Infinite Scrolling:** 
   - Dynamically loads more books as the user scrolls.
