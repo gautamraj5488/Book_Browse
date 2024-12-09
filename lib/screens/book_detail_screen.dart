@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:book_browse/utils/colors.dart';
 import 'package:book_browse/utils/text_styles.dart';
 import 'package:book_browse/widgets/image_with_placeholder.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:book_browse/models/book.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -43,10 +44,10 @@ class BookDetailScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         
-         leading: IconButton(
+         leading:IconButton(
           icon: Icon(
-            Platform.isIOS ? Icons.arrow_back_ios : Icons.arrow_back, 
-            color: AppColors.whiteColor, 
+            kIsWeb ? Icons.arrow_back : (Platform.isIOS ? Icons.arrow_back_ios : Icons.arrow_back),
+            color: AppColors.whiteColor,
           ),
           onPressed: () {
             Navigator.pop(context);
@@ -63,7 +64,7 @@ class BookDetailScreen extends StatelessWidget {
               Card(
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(16.0),
-                  child: ImageWithPlaceholder(imageUrl: book.imageUrl!, width: screenWidth, height: screenHeight * 0.7),
+                  child: ImageWithPlaceholder(imageUrl: book.imageUrl!, width: screenWidth, height: screenHeight * 0.7,),
                 ),
               ),
             const SizedBox(height: 20),

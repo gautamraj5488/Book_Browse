@@ -34,10 +34,10 @@ class ImageWithPlaceholder extends StatelessWidget {
               );
             },
             errorBuilder: (context, error, stackTrace) {
-              return Image.network(
-                'assets/images/error.jpg',
-                width: width*0.1,
-                height: height*0.1,
+              return Image.asset(
+                'assets/images/error.png',
+                width: width,
+                height: height,
                 fit: fit,
               );
             },

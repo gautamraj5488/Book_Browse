@@ -107,7 +107,8 @@ class _BookListScreenState extends State<BookListScreen> with TickerProviderStat
       }
     } catch (e) {
       setState(() {
-        _errorMessage = "Failed to load books. Please try again later.";
+        _errorMessage = e.toString();
+        print(_errorMessage.toLowerCase());
       });
     } finally {
       setState(() {
@@ -239,7 +240,7 @@ bool _anyWordStartsWith(String text, String query) {
                     crossAxisCount: screenWidth > 1200 ? 4 : screenWidth > 800 ? 3 : 2,
                     crossAxisSpacing: 15,
                     mainAxisSpacing: 15,
-                    childAspectRatio: screenWidth > 1200 ? 0.4 : screenWidth > 800 ? 0.5 : 0.7,
+                    childAspectRatio: 1,
                   ),
                   controller: _scrollController,
                   itemCount: _filteredBooks.length + (_hasMore ? 1 : 0),

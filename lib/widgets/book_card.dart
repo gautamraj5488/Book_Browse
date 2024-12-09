@@ -15,8 +15,15 @@ class BookCard extends StatelessWidget {
     required this.searchQuery,
   });
 
+  double dynamicHeight(BuildContext context, double factor) {
+  return MediaQuery.of(context).size.width * factor;
+  }
+
+  
+
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
     return Container(
       decoration: BoxDecoration(
         color: AppColors.cardColor,
@@ -43,8 +50,8 @@ class BookCard extends StatelessWidget {
                 child: ImageWithPlaceholder(
                   imageUrl: book.imageUrl,
                   width: double.infinity,
-                  height: 170,
-                  fit: BoxFit.cover,
+                  height: screenWidth > 1200 ? dynamicHeight(context,0.2) : screenWidth > 800 ? dynamicHeight(context,0.25) : dynamicHeight(context,0.25),
+                  fit: BoxFit.scaleDown,
                 ),
               ),
               Padding(

@@ -20,9 +20,10 @@ class _SplashScreenState extends State<SplashScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => ShakeManager(
-              child: BookListScreen(),
-            ),
+            // builder: (context) => ShakeManager(
+            //   child: BookListScreen(),
+            // ),
+            builder: (context) => BookListScreen()
           ),
         );
       },

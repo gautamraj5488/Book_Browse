@@ -28,7 +28,7 @@ class ErrorMessage extends StatelessWidget {
           ElevatedButton(
             onPressed: onRetry,
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryColor),
-            child: const Text("Retry"),
+            child: Text("Retry",style: AppTextStyles(context).subheadingStyle,),
           ),
         ],
       ),
