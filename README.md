@@ -25,6 +25,11 @@ Book Browse is a Flutter-based mobile application that allows users to browse an
 - **Book Details Screen:**
   - Shows book-specific information, such as the title, author, genre, and more.
 
+- **Issue Reporting:**
+  - Shake the device to report an issue.
+  - A dialog appears where users can describe their issue.
+  - If the message is left empty, an error message is displayed asking to "Write your issue."
+
 ---
 
 ## **Code Structure**
@@ -43,16 +48,18 @@ The project follows a clean and modular code structure, adhering to the best pra
     - Includes different UI screens such as:
       - `BookListScreen`: Displays a scrollable list of books with filters.
       - `BookDetailScreen`: Shows detailed information for selected books.
+      - `SplashScreen`: The first screen of the app, showing the logo.
   - **`widgets/`:** 
     - Custom widgets for reusable UI components:
       - `BookCard`: Displays a single book with its details.
-      - `ErrorMessage` : Display error messages.
-      - `LoadingIndicator` : Display loading indicator when waiting for data.
+      - `ErrorMessage`: Display error messages.
+      - `LoadingIndicator`: Display loading indicator when waiting for data.
       - `WaveDotsWidget`: A wave animation used for loading indicators.
       - `ImageWithPlaceholder`: Smoothly transitions between placeholder and loaded images.
-      - `ShimmerWidget` : This enhances user experience.
+      - `ShimmerWidget`: Enhances user experience with shimmer effects.
   - **`utils/`:**
     - Contains utility files for constants, themes, and helper functions.
+    - **`shake_manager.dart`**: Handles shake detection for reporting issues.
 
 ---
 
@@ -101,10 +108,14 @@ The project follows a clean and modular code structure, adhering to the best pra
    - The `screens/BookListScreen` displays books in a grid layout. Infinite scrolling loads additional books as users navigate through the app.
 
 3. **Search:**
-   - We can search the book by the title of the book, name of the author, or by the bookshelf.
+   - You can search books by the title, author, or bookshelf.
 
 4. **Offline Mode:**
    - Cached data is retrieved using the `flutter_cache_manager` package, reducing API usage and improving app performance.
+
+5. **Issue Reporting:**
+   - Users can shake the device to trigger the issue reporting dialog.
+   - The dialog requests a description of the issue. If the input is empty, a "Write something here" error message is shown to prompt the user to fill in the message.
 
 ---
 
@@ -119,3 +130,5 @@ We welcome contributions to enhance the app’s features or fix issues. Please:
 
 ## **License**
 This project is licensed under the MIT License.
+
+---
